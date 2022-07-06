@@ -6,12 +6,12 @@ public class GameManager {
     Integer gridRows = 3;
     Integer gridCols = 3;
 
-    static Integer currentNodeLenth = 0;
+    static Integer currentNodeLength = 0;
 
     GameCreater gameCreater = new GameCreater();
     String[][] colorGrid = gameCreater.createGame(gridRows, gridCols);
     private Node maxLengthNode = new Node();
-    static Integer maxNodeLenth = 0;
+    static Integer maxNodeLength = 0;
 
     public Node searchAdjacentColorNodes(Integer row, Integer col, Node currentNode) {
 
@@ -27,20 +27,21 @@ public class GameManager {
                 currentNode.color = currentNodeColor;
                 currentNode.next = nextNode;
                 currentNode.down = downNode;
-                currentNodeLenth = currentNodeLenth + 2;
+                currentNodeLength = currentNodeLength + 2;
                 searchAdjacentColorNodes(row + 1, col, currentNode);
-                searchAdjacentColorNodes(row + 1, col, currentNode);
+                searchAdjacentColorNodes(row, col+1, currentNode);
+
             } else if (nextNode.color == currentNodeColor) {
                 currentNode.next = nextNode;
                 searchAdjacentColorNodes(row, col + 1, currentNode);
-                currentNodeLenth = currentNodeLenth + 1;
+                currentNodeLength = currentNodeLength + 1;
             } else if (downNode.color == currentNodeColor) {
                 currentNode.down = downNode;
                 searchAdjacentColorNodes(row + 1, col, currentNode);
-                currentNodeLenth = currentNodeLenth + 1;
+                currentNodeLength = currentNodeLength + 1;
             } else {
-                if (maxNodeLenth < currentNodeLenth) {
-                    maxNodeLenth = currentNodeLenth;
+                if (maxNodeLength < currentNodeLength) {
+                    maxNodeLength = currentNodeLength;
                     maxLengthNode = currentNode;
                 }
                 Node newNext = new Node();
