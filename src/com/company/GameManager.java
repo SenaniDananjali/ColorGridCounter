@@ -5,31 +5,31 @@ public class GameManager {
 
     Integer gridRows = 3;
     Integer gridCols = 3;
-
-    static Integer currentNodeLength = 0;
-
+    Integer currentNodeLength = 0;
+    Integer maxNodeLength = 1;
     GameCreater gameCreater = new GameCreater();
     String[][] colorGrid = gameCreater.createGame(gridRows, gridCols);
     private Node maxLengthNode = new Node();
-    static Integer maxNodeLength = 0;
 
     public Node searchAdjacentColorNodes(Integer row, Integer col, Node currentNode) {
-
+        currentNode.x = row;
+        currentNode.y = col;
         if (row >= gridRows - 1 | col >= gridCols - 1) {
             return new Node();
         } else {
-            String currentNodeColor = colorGrid[row][col];
 
+            String currentNodeColor = colorGrid[row][col];
+            currentNode.color = currentNodeColor;
             Node downNode = verticalSearch(row, col, currentNode);
             Node nextNode = horizontalSearch(row, col, currentNode);
-
+            maxLengthNode=currentNode;
             if (nextNode.color == downNode.color) {
-                currentNode.color = currentNodeColor;
+
                 currentNode.next = nextNode;
                 currentNode.down = downNode;
                 currentNodeLength = currentNodeLength + 2;
                 searchAdjacentColorNodes(row + 1, col, currentNode);
-                searchAdjacentColorNodes(row, col+1, currentNode);
+                searchAdjacentColorNodes(row, col + 1, currentNode);
 
             } else if (nextNode.color == currentNodeColor) {
                 currentNode.next = nextNode;
@@ -40,7 +40,7 @@ public class GameManager {
                 searchAdjacentColorNodes(row + 1, col, currentNode);
                 currentNodeLength = currentNodeLength + 1;
             } else {
-                if (maxNodeLength < currentNodeLength) {
+                if (maxNodeLength <= currentNodeLength) {
                     maxNodeLength = currentNodeLength;
                     maxLengthNode = currentNode;
                 }

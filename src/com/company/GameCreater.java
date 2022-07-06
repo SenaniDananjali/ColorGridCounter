@@ -19,7 +19,7 @@ public class GameCreater {
 
     public String randomColor(){
         Color color = new Color((int) (Math.random() * 0x1000000));
-        System.out.println(Integer.toHexString(color.getRGB()));
+//        System.out.println(Integer.toHexString(color.getRGB()));
         return Integer.toHexString(color.getRGB());
     }
 
