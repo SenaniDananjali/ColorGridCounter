@@ -1,84 +1,104 @@
 package com.company;
 
 
-public class GameManager {
+public class GameManager extends Node {
 
-    Integer gridRows = 3;
-    Integer gridCols = 3;
+    Integer count = 0;
     Integer currentNodeLength = 0;
-    Integer maxNodeLength = 1;
-    GameCreater gameCreater = new GameCreater();
-    String[][] colorGrid = gameCreater.createGame(gridRows, gridCols);
+    Integer maxNodeLength = 0;
+    Node longestNodeHead = new Node();
+
     private Node maxLengthNode = new Node();
 
-    public Node searchAdjacentColorNodes(Integer row, Integer col, Node currentNode) {
-        currentNode.x = row;
-        currentNode.y = col;
-        if (row >= gridRows - 1 | col >= gridCols - 1) {
-            return new Node();
-        } else {
 
-            String currentNodeColor = colorGrid[row][col];
-            currentNode.color = currentNodeColor;
-            Node downNode = verticalSearch(row, col, currentNode);
-            Node nextNode = horizontalSearch(row, col, currentNode);
-            maxLengthNode=currentNode;
-            if (nextNode.color == downNode.color) {
+    public Node getAdjacentColorNodes(Node currentNode, Node headNode, String[][] colorGrid) {
+        Integer gridRows = colorGrid.length;
+        Integer gridCols = colorGrid[0].length;
+        if (currentNode.color == null | headNode.color == null) {
+            currentNode.color = colorGrid[currentNode.x][currentNode.y];
+            headNode.color = colorGrid[headNode.x][headNode.y];
+        }
 
-                currentNode.next = nextNode;
-                currentNode.down = downNode;
-                currentNodeLength = currentNodeLength + 2;
-                searchAdjacentColorNodes(row + 1, col, currentNode);
-                searchAdjacentColorNodes(row, col + 1, currentNode);
+        //check whether next node is same in color
+        //if next node applicable
 
-            } else if (nextNode.color == currentNodeColor) {
-                currentNode.next = nextNode;
-                searchAdjacentColorNodes(row, col + 1, currentNode);
-                currentNodeLength = currentNodeLength + 1;
-            } else if (downNode.color == currentNodeColor) {
-                currentNode.down = downNode;
-                searchAdjacentColorNodes(row + 1, col, currentNode);
-                currentNodeLength = currentNodeLength + 1;
-            } else {
-                if (maxNodeLength <= currentNodeLength) {
-                    maxNodeLength = currentNodeLength;
-                    maxLengthNode = currentNode;
+        Integer nextX = currentNode.x;
+        Integer nextY = currentNode.y + 1;
+        if (nextX < gridRows && nextY < gridCols) {
+            //create next node
+            Node nextNode = new Node(nextX, nextY, null, currentNode, null, null);
+            if (currentNode.color == colorGrid[nextX][nextY]) {
+                //check whether the node added prior to the tree
+                if (!checkNode(currentNode, nextX, nextY)) {
+                    nextNode.color = currentNode.color;
+                    nextNode.prev = currentNode;
+                    getAdjacentColorNodes(nextNode, currentNode, colorGrid);
                 }
-                Node newNext = new Node();
-                Node newDown = new Node();
-                searchAdjacentColorNodes(row, col + 1, newNext);
-                searchAdjacentColorNodes(row + 1, col, newDown);
+
+            } else {
+                nextNode = null;
+                nextNode.prev = currentNode;
+                nextNode.color = colorGrid[nextX][nextY];
+                Node newNode = new Node(nextX, nextY, null, null, null, null);
+
+
+                Thread t1 = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        System.out.println("Thread id " + Thread.currentThread());
+                        getAdjacentColorNodes(newNode, newNode, colorGrid);
+                    }
+                });
+                t1.setPriority(Thread.NORM_PRIORITY);
+                t1.start();
+
+            }
+
+        }
+        //check down Node applicable
+        Integer downX = currentNode.x + 1;
+        Integer downY = currentNode.y;
+        if (downX < gridRows && downY < gridCols) {
+            //create down Node
+
+            Node downNode = new Node(downX, downY, null, currentNode, null, null);
+            if (currentNode.color == colorGrid[downX][downY]) {
+
+                if (!checkNode(currentNode, downX, downY)) {
+                    downNode.color = currentNode.color;
+                    downNode.prev = currentNode;
+                    getAdjacentColorNodes(downNode, currentNode, colorGrid);
+                }
+            } else {
+                downNode = null;
+                downNode.prev = currentNode;
+                downNode.color = colorGrid[downX][downY];
+                Node newNode = new Node(downX, downY, null, null, null, null);
+                Thread t2 = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        System.out.println("Thread id " + Thread.currentThread());
+                        getAdjacentColorNodes(newNode, newNode, colorGrid);
+                    }
+                });
+                t2.setPriority(Thread.MIN_PRIORITY);
+                t2.start();
+
             }
         }
-        return maxLengthNode;
 
-    }
+        //check for dead end of the tree
 
-    public Node horizontalSearch(Integer row, Integer col, Node currentNode) {
-        String nextNodeColor = colorGrid[row][col + 1];
-        Node nextNode = new Node();
+        this.count = nodeCount(currentNode, count);
+        // update max count, max head node
+        if (count >= maxNodeLength) {
+            maxNodeLength = count;
+            count=0;
+            longestNodeHead = currentNode;
 
-        nextNode.color = nextNodeColor;
-        nextNode.x = row;
-        nextNode.y = col + 1;
-        currentNode.next = nextNode;
+        }
 
-        return nextNode;
-
-    }
-
-
-    public Node verticalSearch(Integer row, Integer col, Node currentNode) {
-
-        String downNodeColor = colorGrid[row + 1][col];
-
-        Node downNode = new Node();
-        downNode.color = downNodeColor;
-        downNode.x = row + 1;
-        downNode.y = col;
-
-        return downNode;
+        return longestNodeHead;
     }
 }
-
 
